@@ -222,6 +222,7 @@ pub fn highlight(node: &LinkedNode) -> Option<Tag> {
         SyntaxKind::PlusEq => Some(Tag::Operator),
         SyntaxKind::HyphEq => Some(Tag::Operator),
         SyntaxKind::StarEq => Some(Tag::Operator),
+        SyntaxKind::HatEq => Some(Tag::Operator),
         SyntaxKind::SlashEq => Some(Tag::Operator),
         SyntaxKind::Dots => Some(Tag::Operator),
         SyntaxKind::Arrow => Some(Tag::Operator),

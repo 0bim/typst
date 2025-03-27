@@ -285,6 +285,84 @@ pub fn mul(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
     })
 }
 
+/// Compute the power of two values.
+pub fn pow(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
+    use Value::*;
+
+    // Check for zero to the power of zero
+    if matches!(
+        (lhs.clone(), rhs.clone()),
+        (Int(0) | Float(0.0) | Decimal(_), Int(0) | Float(0.0))
+    ) {
+        bail!("zero to the power of zero is undefined");
+    }
+
+    // Check exponent size and validity
+    match rhs.clone() {
+        Int(i) if i32::try_from(i).is_err() => bail!("exponent is too large"),
+        Float(f) if !f.is_normal() && f != 0.0 => {
+            bail!("exponent may not be infinite, subnormal, or NaN")
+        }
+        _ => {}
+    }
+
+    Ok(match (lhs, rhs) {
+        // Integer base with non-negative integer exponent
+        (Int(a), Int(b)) if b >= 0 => {
+            let result = a.checked_pow(b as u32).ok_or_else(too_large)?;
+            Int(result)
+        }
+
+        // Decimal base with integer exponent
+        (Decimal(a), Int(b)) => {
+            let result = a.checked_powi(b).ok_or_else(too_large)?;
+            Decimal(result)
+        }
+
+        // Floating-point or mixed type computation
+        (Int(a), Int(b)) => {
+            let result = (a as f64).powi(b as i32);
+            if result.is_nan() {
+                bail!("the result is not a real number");
+            }
+            Float(result)
+        }
+        (Int(a), Float(b)) => {
+            let result = (a as f64).powf(b);
+            if result.is_nan() {
+                bail!("the result is not a real number");
+            }
+            Float(result)
+        }
+        (Float(a), Int(b)) => {
+            let result = a.powi(b as i32);
+            if result.is_nan() {
+                bail!("the result is not a real number");
+            }
+            Float(result)
+        }
+        (Float(a), Float(b)) => {
+            // Special cases for common bases
+            let result = if a == std::f64::consts::E {
+                b.exp()
+            } else if a == 2.0 {
+                b.exp2()
+            } else {
+                a.powf(b)
+            };
+
+            if result.is_nan() {
+                bail!("the result is not a real number");
+            }
+            Float(result)
+        }
+        (Decimal(_), Float(_)) | (Float(_), Decimal(_)) => {
+            bail!("cannot apply power to decimal and float")
+        }
+        (a, b) => mismatch!("cannot raise {} to the power of {}", a, b),
+    })
+}
+
 /// Compute the quotient of two values.
 pub fn div(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
     use Value::*;

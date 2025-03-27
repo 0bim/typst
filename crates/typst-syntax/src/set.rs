@@ -118,8 +118,8 @@ pub const UNARY_OP: SyntaxSet = syntax_set!(Plus, Minus, Not);
 
 /// Syntax kinds that are binary operators.
 pub const BINARY_OP: SyntaxSet = syntax_set!(
-    Plus, Minus, Star, Slash, And, Or, EqEq, ExclEq, Lt, LtEq, Gt, GtEq, Eq, In, PlusEq,
-    HyphEq, StarEq, SlashEq,
+    Plus, Minus, Star, Hat, Slash, And, Or, EqEq, ExclEq, Lt, LtEq, Gt, GtEq, Eq, In,
+    PlusEq, HyphEq, StarEq, HatEq, SlashEq,
 );
 
 /// Syntax kinds that can start an argument in a function call.

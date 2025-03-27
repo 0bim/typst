@@ -156,6 +156,8 @@ pub enum SyntaxKind {
     HyphEq,
     /// The multiply-assign operator: `*=`.
     StarEq,
+    /// The power-assign operator: `^=`.
+    HatEq,
     /// The divide-assign operator: `/=`.
     SlashEq,
     /// Indicates a spread or sink: `..`.
@@ -448,6 +450,7 @@ impl SyntaxKind {
             Self::PlusEq => "add-assign operator",
             Self::HyphEq => "subtract-assign operator",
             Self::StarEq => "multiply-assign operator",
+            Self::HatEq => "power-assign operator",
             Self::SlashEq => "divide-assign operator",
             Self::Dots => "dots",
             Self::Arrow => "arrow",

@@ -105,50 +105,16 @@ pub fn pow(
     /// The exponent of the power.
     exponent: Spanned<Num>,
 ) -> SourceResult<DecNum> {
-    match exponent.v {
-        _ if exponent.v.float() == 0.0 && base.is_zero() => {
-            bail!(span, "zero to the power of zero is undefined")
-        }
-        Num::Int(i) if i32::try_from(i).is_err() => {
-            bail!(exponent.span, "exponent is too large")
-        }
-        Num::Float(f) if !f.is_normal() && f != 0.0 => {
-            bail!(exponent.span, "exponent may not be infinite, subnormal, or NaN")
-        }
-        _ => {}
-    };
-
-    match (base, exponent.v) {
-        (DecNum::Int(a), Num::Int(b)) if b >= 0 => a
-            .checked_pow(b as u32)
-            .map(DecNum::Int)
-            .ok_or_else(too_large)
-            .at(span),
-        (DecNum::Decimal(a), Num::Int(b)) => {
-            a.checked_powi(b).map(DecNum::Decimal).ok_or_else(too_large).at(span)
-        }
-        (a, b) => {
-            let Some(a) = a.float() else {
-                return Err(cant_apply_to_decimal_and_float()).at(span);
-            };
-
-            let result = if a == std::f64::consts::E {
-                b.float().exp()
-            } else if a == 2.0 {
-                b.float().exp2()
-            } else if let Num::Int(b) = b {
-                a.powi(b as i32)
-            } else {
-                a.powf(b.float())
-            };
-
-            if result.is_nan() {
-                bail!(span, "the result is not a real number")
-            }
-
-            Ok(DecNum::Float(result))
-        }
+    if let Ok(result_value) = ops::pow(base.into_value(), exponent.into_value()) {
+        return Ok(match result_value {
+            Value::Int(n) => DecNum::Int(n),
+            Value::Float(n) => DecNum::Float(n),
+            Value::Decimal(n) => DecNum::Decimal(n),
+            _ => unreachable!(),
+        });
     }
+
+    bail!(span, "No matching operation for this combination of types")
 }
 
 /// Raises a value to some exponent of e.

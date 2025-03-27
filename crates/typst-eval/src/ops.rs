@@ -26,6 +26,7 @@ impl Eval for ast::Binary<'_> {
             ast::BinOp::Add => apply_binary(self, vm, ops::add),
             ast::BinOp::Sub => apply_binary(self, vm, ops::sub),
             ast::BinOp::Mul => apply_binary(self, vm, ops::mul),
+            ast::BinOp::Pow => apply_binary(self, vm, ops::pow),
             ast::BinOp::Div => apply_binary(self, vm, ops::div),
             ast::BinOp::And => apply_binary(self, vm, ops::and),
             ast::BinOp::Or => apply_binary(self, vm, ops::or),
@@ -41,6 +42,7 @@ impl Eval for ast::Binary<'_> {
             ast::BinOp::AddAssign => apply_assignment(self, vm, ops::add),
             ast::BinOp::SubAssign => apply_assignment(self, vm, ops::sub),
             ast::BinOp::MulAssign => apply_assignment(self, vm, ops::mul),
+            ast::BinOp::PowAssign => apply_assignment(self, vm, ops::pow),
             ast::BinOp::DivAssign => apply_assignment(self, vm, ops::div),
         }
     }
