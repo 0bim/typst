@@ -289,7 +289,6 @@ pub fn mul(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
 pub fn pow(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
     use Value::*;
 
-    // Check for zero to the power of zero
     if matches!(
         (lhs.clone(), rhs.clone()),
         (Int(0) | Float(0.0) | Decimal(_), Int(0) | Float(0.0))
@@ -297,7 +296,6 @@ pub fn pow(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
         bail!("zero to the power of zero is undefined");
     }
 
-    // Check exponent size and validity
     match rhs.clone() {
         Int(i) if i32::try_from(i).is_err() => bail!("exponent is too large"),
         Float(f) if !f.is_normal() && f != 0.0 => {
@@ -307,19 +305,15 @@ pub fn pow(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
     }
 
     Ok(match (lhs, rhs) {
-        // Integer base with non-negative integer exponent
         (Int(a), Int(b)) if b >= 0 => {
             let result = a.checked_pow(b as u32).ok_or_else(too_large)?;
             Int(result)
         }
-
-        // Decimal base with integer exponent
         (Decimal(a), Int(b)) => {
             let result = a.checked_powi(b).ok_or_else(too_large)?;
             Decimal(result)
         }
 
-        // Floating-point or mixed type computation
         (Int(a), Int(b)) => {
             let result = (a as f64).powi(b as i32);
             if result.is_nan() {
@@ -342,7 +336,7 @@ pub fn pow(lhs: Value, rhs: Value) -> HintedStrResult<Value> {
             Float(result)
         }
         (Float(a), Float(b)) => {
-            // Special cases for common bases
+            // common bases
             let result = if a == std::f64::consts::E {
                 b.exp()
             } else if a == 2.0 {
